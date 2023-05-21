@@ -1,0 +1,43 @@
+---
+- hosts: qaserver
+  become: yes
+  ignore_errors: yes
+  tasks:
+      - name: Install packages 
+        package: 
+          name: "{{ item }}"
+          state: present
+        with_items:
+          - wget
+          - unzip
+          - httpd
+          - zip
+      - name: Download the zip file 
+        get_url: 
+          dest: "/tmp/main.zip"
+          url: "https://github.com/utrains/static-resume/archive/refs/heads/main.zip"
+      - name: Unzip 
+        unarchive: 
+          remote_src: true
+          src: "/tmp/main.zip"
+          dest: "/tmp"
+
+#      - name: Extract resume files (unzip)
+#        shell: unzip /tmp/main.zip -d /tmp
+#        args:
+#          executable: /bin/bash
+
+      - name: Copy contents into web server directory
+        copy:
+          remote_src: true
+          src: "/tmp/static-resume-main/iPortfolio/" 
+          dest: "/var/www/html/"
+        
+      - name: Start Apache service
+        service: 
+          name: httpd
+          enabled: true
+          state: "started"   
+
+
+            

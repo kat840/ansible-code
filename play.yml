@@ -1,0 +1,49 @@
+---
+- hosts: devserver
+  become: yes
+  ignore_errors: yes
+  vars: 
+    pkg_name: httpd
+    username: kat
+  tasks: 
+    - name: Creating user
+      user: 
+        name: "{{ username }}" 
+        comment: Kat Admin
+        shell: /bin/bash
+          # when: ansible_os_family == "Debian" 
+    - name: Create file 
+      file: 
+        path: /tmp/ansible.txt
+        state: touch
+        mode: '0600'
+      register: output
+    - name: read the output 
+      debug: 
+        var: output 
+    - name: Create directory
+      file: 
+        path: /tmp/dir
+        state: directory
+        mode: '0777' 
+      tags: 
+        - app1
+        - c1  
+    - name: Install Apache
+      yum: 
+        name: "{{ pkg_name }}"
+        state: present
+    - name: Install finger and other packages
+      package: 
+       name: "{{ item }}"
+       state: present 
+      with_items:
+        - wget
+        - samba
+#        - java-8*
+        - finger
+
+
+
+          
+
